@@ -1,6 +1,5 @@
 <?php
 
-// src/Entity/User.php
 namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
@@ -27,6 +26,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "string")]
     private string $password;
 
+    // Plain password is used for form processing, not stored in the database.
     private ?string $plainPassword = null;
 
     #[ORM\ManyToMany(targetEntity: Group::class, inversedBy: "users")]
@@ -58,7 +58,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $roles = $this->roles;
 
-        // Добавляем роли из групп
+        // Add roles from groups (avoiding duplicates)
         foreach ($this->groups as $group) {
             $roles = array_merge($roles, $group->getRoles());
         }
@@ -83,6 +83,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    // The plain password is only used during form submission (not stored in the database)
     public function getPlainPassword(): ?string
     {
         return $this->plainPassword;
@@ -94,6 +95,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    // Clear plain password after processing to ensure it is not exposed
     public function eraseCredentials(): void
     {
         $this->plainPassword = null;
@@ -104,15 +106,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->groups;
     }
 
+    // Add a group to the user
     public function addGroup(Group $group): self
     {
         if (!$this->groups->contains($group)) {
             $this->groups->add($group);
-            $group->addUser($this); // Двусторонняя связь
+            $group->addUser($this); // Bidirectional relationship
         }
         return $this;
     }
 
+    // Remove a group from the user
     public function removeGroup(Group $group): self
     {
         if ($this->groups->removeElement($group)) {
@@ -121,9 +125,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    // Get the user identifier (Symfony 6+ compatibility with UserInterface)
     public function getUserIdentifier(): string
     {
         return $this->email;
     }
-}
 
+    // Clear all groups the user belongs to
+    public function clearGroups(): self
+    {
+        foreach ($this->groups as $group) {
+            $this->removeGroup($group);
+        }
+        return $this;
+    }
+}
