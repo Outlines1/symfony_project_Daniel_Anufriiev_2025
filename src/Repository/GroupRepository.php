@@ -22,7 +22,6 @@ class GroupRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find groups by name
      *
      * @param string $name
      * @return Group[] Returns an array of Group objects

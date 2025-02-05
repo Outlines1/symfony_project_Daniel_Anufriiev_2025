@@ -35,7 +35,7 @@ final class GroupController extends AbstractController
     }
 
     #[Route(name: 'api_group_index', methods: ['GET'])]
-    #[IsGranted('ROLE_USER')]  // Anyone with ROLE_USER or higher can view groups
+    #[IsGranted('ROLE_USER')]
     public function index(): Response
     {
         $groups = $this->groupRepository->findAll();
@@ -77,7 +77,7 @@ final class GroupController extends AbstractController
     }
 
     #[Route('/{id<\d+>}', name: 'api_group_show', methods: ['GET'])]
-    #[IsGranted('ROLE_USER')]  // Anyone with ROLE_USER or higher can view a group
+    #[IsGranted('ROLE_USER')]
     public function show(Group $group): Response
     {
         return $this->formatter->success([
@@ -144,7 +144,7 @@ final class GroupController extends AbstractController
     }
 
     #[Route('/{id}/users/{userId}', name: 'api_group_remove_user', methods: ['DELETE'])]
-    #[IsGranted('ROLE_ADMIN')]  // Only admin can remove users from groups
+    #[IsGranted('ROLE_ADMIN')]
     public function removeUserFromGroup(int $id, int $userId): Response
     {
         $group = $this->groupRepository->find($id);

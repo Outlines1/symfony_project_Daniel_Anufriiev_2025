@@ -101,7 +101,7 @@ final class UserController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function edit(Request $request, User $user): Response
     {
-        // Check if the logged-in user has permission to edit this user
+
         if ($this->getUser() !== $user && !in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
             throw new AccessDeniedException('You do not have permission to edit this user.');
         }
@@ -137,8 +137,8 @@ final class UserController extends AbstractController
     #[Route('/{id}/groups/{groupId}', name: 'api_user_add_group', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function addUserToGroup(
-        int $id,             // Pass the user id as an integer
-        int $groupId,        // Group id
+        int $id,
+        int $groupId,
         UserRepository $userRepository,
         GroupRepository $groupRepository,
         EntityManagerInterface $entityManager
@@ -181,7 +181,7 @@ final class UserController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function delete(User $user): Response
     {
-        // Check if the logged-in user is authorized to delete this user
+
         if ($this->getUser() !== $user && !in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
             throw new AccessDeniedException('You do not have permission to delete this user.');
         }

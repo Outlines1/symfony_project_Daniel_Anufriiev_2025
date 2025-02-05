@@ -19,7 +19,7 @@ class UserFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-        // Создаем несколько групп
+
         $groupAdmin = new Group();
         $groupAdmin->setName('Admins');
         $manager->persist($groupAdmin);
@@ -28,31 +28,28 @@ class UserFixtures extends Fixture
         $groupUser->setName('Users');
         $manager->persist($groupUser);
 
-        // Создаем тестовых пользователей
+
         for ($i = 1; $i <= 10; $i++) {
             $user = new User();
             $user->setEmail("user{$i}@example.com");
 
-            // Хешируем пароль
+
             $hashedPassword = $this->passwordHasher->hashPassword($user, 'password123');
             $user->setPassword($hashedPassword);
 
-            // Назначаем роль и группу
+
             $user->setRoles(['ROLE_USER']);
             $user->addGroup($groupUser);
 
             $manager->persist($user);
         }
 
-        // Создаем администратора
         $admin = new User();
         $admin->setEmail('admin@example.com');
 
-        // Хешируем пароль
         $hashedPassword = $this->passwordHasher->hashPassword($admin, 'adminpassword');
         $admin->setPassword($hashedPassword);
 
-        // Назначаем роли и группу
         $admin->setRoles(['ROLE_ADMIN']);
         $admin->addGroup($groupAdmin);
 
