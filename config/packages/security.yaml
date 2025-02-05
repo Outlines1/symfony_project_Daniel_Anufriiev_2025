@@ -1,40 +1,57 @@
-# config/packages/security.yaml
-
 security:
+  # Password hashers - Use the default "auto" algorithm for the User entity
   password_hashers:
     App\Entity\User: 'auto'
 
+  # Providers - Define how user data is fetched from the database
   providers:
     app_user_provider:
       entity:
         class: App\Entity\User
-        property: email
+        property: email  # Use the email to identify the user
 
   firewalls:
+    # Disable security for certain routes, such as profiler and assets
     dev:
-      pattern: ^/(_(profiler|wdt)|css|images|js)/
+      pattern: ^/(_(profiler|wdt)|css|images|js)/  # Exclude Symfony profiler and assets
       security: false
 
+    # Main firewall that handles authentication, login, and logout
     main:
       lazy: true
       provider: app_user_provider
       entry_point: App\Security\UserAuthenticator
+      json_login:
+        check_path: api_login
       form_login:
-        login_path: login
-        check_path: login
+        login_path: app_login  # Route for displaying the login form
+        check_path: app_login  # Route where the form is submitted for authentication
+        enable_csrf: true  # Enable CSRF protection
+        csrf_token_id: authenticate  # CSRF token identifier
+        default_target_path: /lucky/number  # Redirect to this page after login
+
       logout:
-        path: logout
-        target: /
-      custom_authenticator: App\Security\UserAuthenticator
+        path: /logout
 
       remember_me:
-        secret: '%kernel.secret%'
-        lifetime: 604800
-        path: /
-        # by default, the feature is enabled by checking a checkbox in the
-        # login form, uncomment the following line to always enable it.
-        #always_remember_me: true
+        secret: '%kernel.secret%'  # Secret key for "remember me" functionality
+        lifetime: 604800  # 1 week in seconds
+        path: /  # Apply to all paths
+        always_remember_me: true  # User must check "Remember Me"
 
+  # Role hierarchy - Define a hierarchy of roles so that higher roles inherit lower ones
+  role_hierarchy:
+    ROLE_ADMIN: [ROLE_MANAGER, ROLE_USER]  # Admins inherit Manager and User roles
+    ROLE_MANAGER: [ROLE_USER]  # Managers inherit the User role
+    ROLE_USER: []  # Base role for all users
+
+  # Access control - Define which routes are accessible by which roles
   access_control:
-    - { path: ^/admin, roles: ROLE_ADMIN }
-    - { path: ^/profile, roles: ROLE_USER }
+    - { path: ^/api/test-error, roles: ROLE_ADMIN }
+    - { path: ^/admin, roles: ROLE_ADMIN }  # Admins only
+    - { path: ^/manager, roles: ROLE_MANAGER }  # Managers only
+    - { path: ^/profile, roles: ROLE_USER }  # All logged-in users
+    - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }  # Only fully authenticated users
+    - { path: ^/register, roles: PUBLIC_ACCESS }  # Anyone can register
+    - { path: ^/login, roles: PUBLIC_ACCESS }  # Anyone can see the login page
+    - { path: ^/logout, roles: PUBLIC_ACCESS }  # Logout accessible to all
