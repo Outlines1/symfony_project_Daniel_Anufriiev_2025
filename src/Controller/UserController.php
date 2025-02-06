@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[Route('/api/users')]
 final class UserController extends AbstractController
@@ -190,5 +191,32 @@ final class UserController extends AbstractController
         $this->entityManager->flush();
 
         return $this->formatter->success([], 'User deleted', 204);
+    }
+
+    #[Route('/email/search', name: 'get_user_by_email', methods: ['GET'])]
+    public function getUserByEmail(Request $request, UserRepository $userRepository): JsonResponse
+    {
+        $email = $request->query->get('email'); // Get email from query parameters
+
+        if (!$email) {
+            return $this->json([
+                'error' => true,
+                'message' => 'Email parameter is required'
+            ], 400);
+        }
+
+        $user = $userRepository->findUserByEmail($email);
+
+        if (!$user) {
+            return $this->json([
+                'error' => true,
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        return $this->json([
+            'id' => $user->getId(),
+            'email' => $user->getEmail(),
+        ]);
     }
 }

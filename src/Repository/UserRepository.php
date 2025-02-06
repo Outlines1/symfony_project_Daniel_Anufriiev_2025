@@ -22,7 +22,11 @@ class UserRepository extends ServiceEntityRepository
 
     public function findUserByEmail(string $email): ?User
     {
-        return $this->findOneBy(['email' => $email]);
+        return $this->createQueryBuilder('u')  // 'u' is the alias for the User entity
+        ->where('u.email = :email')        // SQL condition
+        ->setParameter('email', $email)    // Bind parameter safely
+        ->getQuery()                       // Get the Doctrine Query
+        ->getOneOrNullResult();            // Return a single result or null
     }
 
     public function findAllUsers(): array
